@@ -85,8 +85,15 @@ Using ma function in forecast package
 # Have them see what happens when they change the moving window...
 
 sma_res <- ma(res_ts, order = 5)
+
+# Just view the moving average on its own: 
+plot(sma_res)
+
+# Or in combo with the original data
 plot(res_ts)
 lines(sma_res, col = "red")
+
+# Or know that you could do this in ggplot...
 
 ```
 
