@@ -135,13 +135,13 @@ j. Autoregressive integrated moving average (ARIMA) using auto.arima for p, d, q
 
 - Use auto.arima to estimate pdq
 ```{r}
-res_pdq <- auto.arima(res_ts) # [1,0,1][0,1,1]
+res_pdq <- auto.arima(res_ts) # [1,0,2][0,1,1]
 res_pdq
 ```
 
 - Fit the ARIMA model
 ```{r}
-res_arima <- arima(res_ts, order = c(1,0,1), seasonal = list(order = c(0,1,1)))
+res_arima <- arima(res_ts, order = c(1,0,2), seasonal = list(order = c(0,1,1)))
 
 ```
 
