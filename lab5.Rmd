@@ -150,3 +150,21 @@ hist(res_arima$residuals)
 qqnorm(res_arima$residuals) #no major concerns
 ```
 
+```{r}
+forecast_res <- forecast(res_arima, h = 72)
+plot(forecast_res) #6 years
+```
+
+```{r}
+#ggplot of the outpus
+
+res_df<-data.frame(forecast_res)
+months_seq<- seq(1,72)
+
+res_df_2<-data.frame(months_seq, res_df)
+
+
+ggplot(res_df, aes(x=months_seq, y=Point.Forecast))+
+  geom_line()
+```
+
