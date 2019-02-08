@@ -1,0 +1,152 @@
+---
+title: "lab_5"
+author: "Vienna Saccomanno"
+date: "2/7/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Lab Week 5 Objectives:
+
+- Intro to time series data class (ts)
+- Graphing ts data
+- Decomposing ts data
+- Exploring autocorrelation
+- Holt Winters and ARIMA preview
+
+Required packages:
+
+- tidyverse
+- tseries
+- forecast
+
+a. Attach packages 
+
+```{r}
+library(tidyverse)
+library(tseries)
+library(forecast)
+
+```
+
+
+```{r}
+energy <- read_csv("energy.csv")
+```
+
+- U.S. Residential Energy Consumption (Jan 1973 - Oct 2017)
+- Trillion BTU
+- US Energy Information Administration (data.gov)
+
+c. Convert to ts data using information in the res_total column from "energy"
+```{r}
+res_ts<- ts(energy$res_total, frequency = 12, start=c(1973,1)) #January 1973
+
+res_ts
+plot(res_ts) #exploratory plot
+
+#Observations:
+#-there is an increasing trend
+#-These data look additive
+
+```
+
+d. decompose our times series
+
+```{r}
+
+res_dc<- decompose(res_ts)
+plot(res_dc)
+
+#Observations: moving average/trend is increasing, seasonality is a pretty big contributor, residuals don't seem to have a pattern
+```
+
+e. other cool ways to presen time series data
+```{r}
+monthplot(res_ts)
+#breaks down within a month how values are changing, over all of the years recorded. Dramaticiincrease in residential energy use in summer months
+```
+
+
+```{r}
+ggseasonplot(res_ts)
+#We see increasing energy use over time
+
+```
+
+f. simple moving averages
+-use forecast::ma()
+```{r}
+
+sma_res<- ma(res_ts, order=5)
+plot(res_ts) #smoothed moving average with window size of x. Changing the window alters how the data appears. Best option is to show the original data + smoothed data
+lines(sma_res, col="red")
+
+```
+
+g. Plot ACF for autocorrelation
+```{r}
+res_acf<-acf(res_ts)
+
+ggtsdisplay(res_ts) #original data + ACF
+```
+
+h. Forcasting using exponential smoothing
+-holtwinters: level, trend and seasonality
+```{r}
+
+res_hw<-HoltWinters(res_ts)
+res_hw
+#Smoothing parameters:
+ #alpha: 0.3258894
+ #beta : 0.001104119
+ #gamma: 0.3005416
+
+plot(res_hw) #original data with prediction on top to check model accuracy (not yet forecasting)
+
+
+```
+
+```{r}
+#Future forecasting with HW
+
+res_forecast<-forecast(res_hw, h= 60) #forecasting for 5 years, 60 mo
+
+plot(res_forecast)
+#flatening trend because weighting more recent years
+
+
+```
+#check distribution of the residuals
+
+```{r}
+#forevery month, find difference between actual data and forecast
+
+hist(res_forecast$residuals) #look pretty normal!
+```
+
+ARIMA: autoregressive intergrated moving avergare (Arima) using auto.arima for p,d,q
+-moving average + trend
+```{r}
+#Need to find p,d, q
+
+res_pdq<-auto.arima(res_ts)
+res_pdq
+
+#ARIMA(1,0,2)(0,1,1) = seasonal and non-seasonal
+```
+
+Fit ARIMA model using pdq inputs
+```{r}
+
+res_arima<-arima(res_ts, order=c(0,1,2), seasonal = list(order=c(0,1,1)))
+
+#Check out the residuals
+par(mfrow = c(1,2))
+hist(res_arima$residuals)
+qqnorm(res_arima$residuals) #no major concerns
+```
+
